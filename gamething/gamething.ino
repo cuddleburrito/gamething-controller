@@ -10,17 +10,8 @@
    This code is provided to how to turn an arduino into an HID keyboard controller for arcade games 
 */
 
-
-#define LED_PIN 13
-
-#define BOUNCE_LOCK-OUT //activate the alternative debouncing method. This method is a lot more responsive, but does not cancel noise.
-
-#define BOUNCE_WAIT 10
-#define BOUNCE_COUNT 1
-
-
 //---------
-// USE THESE FOR THE buttonPreset ARRAY BELOW
+// USE THESE FOR THE buttonPresets ARRAY BELOW
 #define KEY_LEFT_CTRL  0x80
 #define KEY_LEFT_SHIFT 0x81
 #define KEY_LEFT_ALT   0x82
@@ -57,15 +48,15 @@
 #define KEY_F10        0xCB
 #define KEY_F11        0xCC
 #define KEY_F12        0xCD
+
 //---------
 
-int RXLED = 17;  // The RX LED has a defined Arduino pin
+#define LED_PIN 13
+//#define BOUNCE_LOCK-OUT //activate the alternative debouncing method. This method is a lot more responsive, but does not cancel noise.
 
-// Instantiate a Bounce object array to store each debouncer in
-Bounce debouncers[16];
-
-//Instantiate a counter array for each button to debounce count timer
-int debounceCount[16];
+//========== CONFIGURATION SETTINGS ==========
+#define BOUNCE_WAIT 10
+#define BOUNCE_COUNT 1
 
   //pins 2-9, 10, 14,15,16, 18-21
   //for buttons 1-12, up, down, left and right
@@ -88,9 +79,7 @@ int buttonPins[] = {
   15 // joystick right
 };
 
-boolean buttonPressed[16];
-
-char buttonPreset[] = { 
+char buttonPresets[] = { 
   KEY_LEFT_CTRL, //button 1
   KEY_LEFT_ALT, //button 2
   ' ', //button 3
@@ -108,6 +97,16 @@ char buttonPreset[] = {
   KEY_LEFT_ARROW, //joystick left
   KEY_RIGHT_ARROW // joystick right
 };
+
+//========== END CONFIGURATION SETTINGS ==========
+
+int RXLED = 17;  // The RX LED has a defined Arduino pin
+// Instantiate button state array
+boolean buttonPressed[16];
+// Instantiate a Bounce object array to store each debouncer in
+Bounce debouncers[16];
+//Instantiate a counter array for each button to debounce count timer
+int debounceCount[16];
 
 void setup() {
   // put your setup code here, to run once:
@@ -130,7 +129,7 @@ void setup() {
      (debouncers[i]).attach(buttonPins[i]);
      (debouncers[i]).interval(BOUNCE_WAIT);
         delay(100);
-     buttonPressed[i] = false;
+     buttonPressed[i] = false;, 
    }
      
 }
@@ -145,7 +144,7 @@ void loop() {
      if ( value == LOW ) { //if button pressed
        
        if(debounceCount[j] == BOUNCE_COUNT && buttonPressed[j] == false) { //the button has been held down long enough and it hasn't been previously registered as pressed
-          Keyboard.press(char(buttonPreset[j])); //Keyboard.write('1');
+          Keyboard.press(char(buttonPresets[j])); //Keyboard.write('1');
           buttonPressed[j] = true;
         } else {
             if(debounceCount[j] < BOUNCE_COUNT) { 
@@ -158,7 +157,7 @@ void loop() {
         if(debounceCount[j] > 0) {
           debounceCount[j] = debounceCount[j] - 1; //keep decreasing count unless 0
         } else {
-           Keyboard.release(char(buttonPreset[j])); //if 0 then release button
+           Keyboard.release(char(buttonPresets[j])); //if 0 then release button
            buttonPressed[j] = false;
         }
         
